@@ -7,7 +7,6 @@ class Board(object):
         self.root = Tk()
         self.PTP = demo.PointToPointDemo(1)
 
-
         self.distacnce = DoubleVar(self.root)
         self.distacnce.set(self.PTP.channelMode.distance)
         self.smallScale = DoubleVar(self.root)

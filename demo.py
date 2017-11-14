@@ -14,6 +14,24 @@ class PointToPointDemo(object):
     def setConversion(self, conversion):
         self.conversion = conversion
 
+    def setNumofAttenna(self, num):
+        self.channelMode.setNumOfAntenna(num)
+
+    def setType(self, type):
+        self.channelMode.setChannel(type)
+
+    def setAlpha(self, alpha):
+        self.channelMode.setAlpha(alpha)
+
+    def setDistance(self, d):
+        self.channelMode.setDistance(d)
+
+    def setNoise(self, noise):
+        self.channelMode.setNoise(noise)
+
+    def setSmallScale(self, ss):
+        self.channelMode.setSmallScale(ss)
+
     def getThroughput(self):
         gamma = self.channelMode.getGamma() * self.conversion
         return log(1 + gamma)
@@ -32,18 +50,23 @@ class Channel(object):
         self.alpha = 3  ## Path loss exp factor.
         self.numofAttena = numofAttena
         self.type = type
+        self.r = 0
         if numofAttena == 1:
             if not type:
                 self.smallScale = stats.rayleigh.rvs() ## small scale fade
+                self.r = self.smallScale
             else:
                 self.smallScale = stats.rice.rvs()
+                self.r = self.smallScale
         else:
             if not type:
                 self.smallScale = stats.rayleigh.rvs((numofAttena, 1))
+                self.r = np.sum(self.smallScale)
                 _, tmp, _ = la.svd(self.smallScale)
                 self.smallScale = tmp[0]
             else:
                 self.smallScale = stats.rice.rvs((numofAttena, 1))
+                self.r = np.sum(self.smallScale)
                 _, tmp, _ = la.svd(self.smallScale)
                 self.smallScale = tmp[0]
 
@@ -53,18 +76,27 @@ class Channel(object):
     ## set attributes manually
     def setChannel(self, type):
         self.type = type
+        self.ResetChannel()
+
+    def setNumOfAntenna(self, num):
+        self.numofAttena = num
+        self.ResetChannel()
+
+    def ResetChannel(self):
         if self.numofAttena == 1:
             if not type:
                 self.smallScale = stats.rayleigh.rvs() ## small scale fade
             else:
-                self.smallScale = stats.rice.rvs()
+                self.smallScale = stats.rice.rvs(1)
         else:
             if not type:
                 self.smallScale = stats.rayleigh.rvs((self.numofAttena, 1))
+                self.smallScale = np.mat(self.smallScale)
                 _, tmp, _ = la.svd(self.smallScale)
                 self.smallScale = tmp[0]
             else:
-                self.smallScale = stats.rice.rvs((self.numofAttena, 1))
+                self.smallScale = stats.rice.rvs(1, (self.numofAttena, 1))
+                self.smallScale = np.mat(self.smallScale)
                 _, tmp, _ = la.svd(self.smallScale)
                 self.smallScale = tmp[0]
 
@@ -85,12 +117,9 @@ class Channel(object):
     ## use random attributes
 
     def random(self):
-        self.setChannel(self.type)
+        self.ResetChannel()
 
     def getGamma(self):
-        return self.distance ** (-self.alpha * 2) * self.smallScale ** 2 / self.noise
+        return self.distance ** (-self.alpha * 2) * self.smallScale * self.r / self.noise
 
 
-if __name__ == "__main__":
-    PtP = PointToPointDemo(0.5)
-    print PtP.getThroughput()
