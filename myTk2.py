@@ -4,14 +4,15 @@ import demo
 
 class Board(object):
     def __init__(self):
+        self.d = {1:u"瑞利"}
         self.root = Tk()
         self.PTP = demo.PointToPointDemo(1)
 
 
         self.distacnce = DoubleVar(self.root)
         self.distacnce.set(self.PTP.channelMode.distance)
-        self.smallScale = DoubleVar(self.root)
-        self.smallScale.set(self.PTP.channelMode.smallScale)
+        self.numofAttena = IntVar(self.root)
+        self.numofAttena.set(self.PTP.channelMode.numofAttena)
         self.noisePower = DoubleVar(self.root)
         self.noisePower.set(self.PTP.channelMode.np)
         self.conversion = DoubleVar(self.root)
@@ -20,7 +21,8 @@ class Board(object):
         self.alpha.set(self.PTP.channelMode.alpha)
 
         self.dlabel = Label(self.root, text = u"距离(m)")
-        self.slabel = Label(self.root, text = u"信道功率增益")
+        self.slabel = Label(self.root, text = u"发送端天线数量")
+        self.hlabel = Label(self.root, text = u"信道类型")
         self.nlabel = Label(self.root, text = u"噪声功率(dbm)")
         self.clabel = Label(self.root, text = u"能量转换效率（0-1）")
         self.alabel = Label(self.root, text = u"路径损耗因子")
