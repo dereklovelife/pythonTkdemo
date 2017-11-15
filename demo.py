@@ -32,6 +32,15 @@ class PointToPointDemo(object):
     def setSmallScale(self, ss):
         self.channelMode.setSmallScale(ss)
 
+    def setRecvGain(self, gain):
+        self.channelMode.recvGain = gain
+
+    def setTransGain(self, gain):
+        self.channelMode.transGain = gain
+
+    def setFreq(self, f):
+        self.channelMode.freq = f
+
     def getThroughput(self):
         gamma = self.channelMode.getGamma() * self.conversion
         return log(1 + gamma)
@@ -46,6 +55,9 @@ class PointToPointDemo(object):
 
 class Channel(object):
     def __init__(self, numofAttena = 1, type = 0):
+        self.freq = 2400
+        self.recvGain = 10
+        self.transGain = 10
         self.distance = 5
         self.alpha = 3  ## Path loss exp factor.
         self.numofAttena = numofAttena
@@ -70,8 +82,8 @@ class Channel(object):
                 _, tmp, _ = la.svd(self.smallScale)
                 self.smallScale = tmp[0]
 
-        self.noise = 10 ** (-7)
         self.np = -40
+        self.noise = 10 ** ((self.np - 30) / 10)
 
     ## set attributes manually
     def setChannel(self, type):
@@ -120,6 +132,7 @@ class Channel(object):
         self.ResetChannel()
 
     def getGamma(self):
-        return self.distance ** (-self.alpha * 2) * self.smallScale * self.r / self.noise
+        tmp = 10 ** ((self.recvGain + self.transGain) / 10) * self.distance ** (-self.alpha) * self.smallScale * self.r / self.noise
+        return tmp * (30.0 / self.freq / (4 * pi)) ** 2
 
 
